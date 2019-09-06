@@ -11,4 +11,19 @@ there is no data on that route, just write some code, you'll sort it out… don'
 I need this code, just don't know where, perhaps should make some middleware, don't worry, be happy
 
 Go code!
-*/
+*/ 
+
+const express = require('express'); 
+const server = express();
+
+server.use(express.json());
+
+server.get('/', (req, res) => {
+  res.send(`hello`);
+});  
+
+const port = 4000;
+server.listen(port, () => { 
+     console.log(`server on ${port}`
+     );
+})
