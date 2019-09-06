@@ -24,7 +24,7 @@ const actionsModel = require('./data/helpers/actionModel');
 server.use(express.json());
 
 server.get('/', (req, res) => {
-  res.send(`hello`);
+  res.send(`Hello from express....`);
 });  
 
 const port = 4000;
@@ -62,7 +62,8 @@ server.get('/api/actions/:id' , (req , res) => {
     const id = req.params
     actionsModel.get(id)  
     .then(response => {
-        if(response) {
+        if(response) { 
+            console.log(response)
             res.status(200).json(response) 
         } 
         else {
@@ -98,12 +99,12 @@ server.post('/api/actions/:id' , (req , res) => {
     const {description , completed , notes} = req.body;
     const {id} = req.params; 
 
-    if(!description || !notes || typeof completed !== "boolean"){
+    if(!description || !notes || !completed ){
         return res.status(400).json({error : 'you did not provide description , notes and completed' })
     } 
      
     projectModel.getProjectActions({id})
-    .then(( {id} ) => {
+    .then(( {id}) => {
         actionModel.insert({ description, notes, completed });
       });
     }) 
@@ -111,8 +112,8 @@ server.post('/api/actions/:id' , (req , res) => {
 // post a new project 
 
 server.post('/api/projects' , (req,res) => {
-    const { name , description , completed } = req.body; 
-    const id = req.params
+    const { name , description , completed } = req.body;  
+
     if(!description || !completed || !name) {
        return res.status(400).json({error : "you did not provide description , name and completed"})
     } 
@@ -126,4 +127,19 @@ server.post('/api/projects' , (req,res) => {
     })
 })
  
-//
+// remove a project 
+
+server.delete('/api/projects/:id' , (req, res) => {
+  const {id} = req.params;
+  projectModel.remove(id) 
+  .then(response => {
+      if(response){
+        res.status(204).json(response); 
+      } else {
+        res.status(404).json({ error: 'Project with id does not exist' });
+      }
+  })
+  .catch(err => {
+    res.status(500).json({ error: 'Error removing project' });
+  })
+})
