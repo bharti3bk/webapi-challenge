@@ -11,4 +11,135 @@ there is no data on that route, just write some code, you'll sort it out… don'
 I need this code, just don't know where, perhaps should make some middleware, don't worry, be happy
 
 Go code!
-*/
+*/ 
+
+const express = require('express'); 
+const server = express(); 
+
+//imports from project and actions 
+
+const projectModel = require('./data/helpers/projectModel');
+const actionsModel = require('./data/helpers/actionModel');
+
+server.use(express.json());
+
+server.get('/', (req, res) => {
+  res.send(`Hello from express....`);
+});  
+
+const port = 4000;
+server.listen(port, () => { 
+     console.log(`server on ${port}`);
+})  
+
+// get all the actions 
+
+server.get('/api/actions' , (req , res) => {
+    actionsModel.get()  
+    .then(response => {
+        res.status(200).json(response)
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})  
+
+// get all the projects 
+
+server.get('/api/projects' , (req , res) => {
+    projectModel.get()  
+    .then(response => {
+        res.status(200).json(response)
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+
+// get specific action  
+
+server.get('/api/actions/:id' , (req , res) => {
+    const id = req.params
+    actionsModel.get(id)  
+    .then(response => {
+        if(response) { 
+            console.log(response)
+            res.status(200).json(response) 
+        } 
+        else {
+            res.status(400).json(response)
+        } 
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+
+//get specific project 
+
+server.get('/api/projects/:id' , (req , res) => {
+    const id = req.params
+    projectModel.get(id)  
+    .then(response => {
+        if(response) {
+            res.status(200).json(response) 
+        } 
+        else {
+            res.status(400).json(response)
+        } 
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+  
+// post a new action 
+
+server.post('/api/actions/:id' , (req , res) => {
+    const {description , completed , notes} = req.body;
+    const {id} = req.params; 
+
+    if(!description || !notes || !completed ){
+        return res.status(400).json({error : 'you did not provide description , notes and completed' })
+    } 
+     
+    projectModel.getProjectActions({id})
+    .then(( {id}) => {
+        actionModel.insert({ description, notes, completed });
+      });
+    }) 
+
+// post a new project 
+
+server.post('/api/projects' , (req,res) => {
+    const { name , description , completed } = req.body;  
+
+    if(!description || !completed || !name) {
+       return res.status(400).json({error : "you did not provide description , name and completed"})
+    } 
+
+    projectModel.insert({description , name , completed})
+    .then((id ) => {
+        res.status(200).json(id);
+    })
+    .catch(err => {
+        res.status(400).json(err);
+    })
+})
+ 
+// remove a project 
+
+server.delete('/api/projects/:id' , (req, res) => {
+  const {id} = req.params;
+  projectModel.remove(id) 
+  .then(response => {
+      if(response){
+        res.status(204).json(response); 
+      } else {
+        res.status(404).json({ error: 'Project with id does not exist' });
+      }
+  })
+  .catch(err => {
+    res.status(500).json({ error: 'Error removing project' });
+  })
+})
