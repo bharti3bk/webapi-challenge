@@ -1,6 +1,5 @@
 /*
 play this: https://www.youtube.com/watch?v=d-diB65scQU
-
 Sing along:
 
 here's a little code I wrote, you might want to read it really slow, don't worry be happy
@@ -19,7 +18,7 @@ const server = express();
 //imports from project and actions 
 
 const projectModel = require('./data/helpers/projectModel');
-const actionsModel = require('./data/helpers/actionModel');
+const actionsModel = require('./data/helpers/actionModel'); 
 
 server.use(express.json());
 
@@ -32,19 +31,8 @@ server.listen(port, () => {
      console.log(`server on ${port}`);
 })  
 
-// get all the actions 
 
-server.get('/api/actions' , (req , res) => {
-    actionsModel.get()  
-    .then(response => {
-        res.status(200).json(response)
-    })
-    .catch(err => {
-        res.status(500).json(err)
-    })
-})  
-
-// get all the projects 
+// GET all the projects 
 
 server.get('/api/projects' , (req , res) => {
     projectModel.get()  
@@ -56,7 +44,107 @@ server.get('/api/projects' , (req , res) => {
     })
 })    
 
-// get specific action  
+// CREATE a new project 
+
+server.post('/api/projects' , (req,res) => { 
+    const updatedProjects = req.body;
+    projectModel.insert(updatedProjects)
+    .then( response => {
+        res.status(200).json(response);
+    })
+    .catch(err => {
+        res.status(400).json(err);
+    })
+})  
+
+//GETID specific project 
+
+server.get('/api/projects/:id' , validateProjectId, (req , res) => {
+    const id = req.params
+    projectModel.get(id)  
+    .then(response => {
+        if(response) {
+            res.status(200).json(response) 
+        } 
+        else {
+            res.status(400).json(response)
+        } 
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})      
+
+ //UPDATE a project 
+
+ router.put("/api/projects/:id", (req, res) => {
+    const id = req.params.id;
+    const updatedproject = req.body;
+  
+    if (!req.body.name || !req.body.description) {
+      res.status(404).json({ error: "can not update" });
+    } else {
+      projectModel.update(id, updatedproject).then(response => {
+        if (!response) {
+          res.status(400).json(response);
+        } else {
+          res.status(200).json(response);
+        }
+      });
+    }
+  });
+
+// DELETE a project 
+
+server.delete('/api/projects/:id' , validateProjectId, (req, res) => {
+    const {id} = req.params;
+    projectModel.remove(id) 
+    .then(response => {
+        if(response){
+          res.status(204).json(response); 
+        } else {
+          res.status(404).json({ error: 'Project with id does not exist' });
+        }
+    })
+    .catch(err => {
+      res.status(500).json({ error: 'Error removing project' });
+    })
+  })   
+
+
+//ACTIONS ......
+
+// GET all the actions 
+
+server.get('/api/actions' , (req , res) => {
+    actionsModel.get()  
+    .then(response => {
+        console.log(response)
+        res.status(200).json(response)
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})   
+
+// CREATE a new action 
+
+server.post('/api/actions/:id' , (req , res) => {
+    const {description , completed , notes} = req.body;
+    const {id} = req.params; 
+
+    if(!description || !notes || !completed ){
+        return res.status(400).json({error : 'you did not provide description , notes and completed' })
+    } 
+     
+    projectModel.getProjectActions({id})
+    .then(( {id}) => {
+        actionModel.insert({ description, notes, completed });
+      });
+    })  
+
+    
+// GETID specific action  
 
 server.get('/api/actions/:id' , (req , res) => {
     const id = req.params
@@ -74,72 +162,68 @@ server.get('/api/actions/:id' , (req , res) => {
         res.status(500).json(err)
     })
 })    
-
-//get specific project 
-
-server.get('/api/projects/:id' , (req , res) => {
-    const id = req.params
-    projectModel.get(id)  
-    .then(response => {
-        if(response) {
-            res.status(200).json(response) 
-        } 
-        else {
-            res.status(400).json(response)
-        } 
-    })
-    .catch(err => {
-        res.status(500).json(err)
-    })
-})    
   
-// post a new action 
+// UPDATE action for a specific id 
 
-server.post('/api/actions/:id' , (req , res) => {
-    const {description , completed , notes} = req.body;
-    const {id} = req.params; 
-
-    if(!description || !notes || !completed ){
-        return res.status(400).json({error : 'you did not provide description , notes and completed' })
-    } 
-     
-    projectModel.getProjectActions({id})
-    .then(( {id}) => {
-        actionModel.insert({ description, notes, completed });
+server.put('/api/actions/:id' , (req ,res) => {
+    const id = req.params.id;
+    const updatedAction = req.body;
+  
+    actionsModel.get(id)
+      .then(response => {
+        updatedAction.project_id = response.project_id;
+        actionsModel.update(id, updatedAction)
+          .then(response => {
+            res.status(200).json(response);
+          })
+          .catch(err => {
+            res.status(500).json(err);
+          });
+      })
+      .catch(err => {
+        res.status(500).json(err);
       });
-    }) 
+  }) 
 
-// post a new project 
+  //DELETE a action 
 
-server.post('/api/projects' , (req,res) => {
-    const { name , description , completed } = req.body;  
+router.delete("/api/action/:id", (req, res) => {
+    const { id } = req.params;
+    actionsModel.remove(id)
+      .then(result => {
+        res.status(204).json(result);
+      })
+      .catch(err => {
+        console.log(err);
+        res.status(500).json({ error: 'server error'});
+      });
+  });
 
-    if(!description || !completed || !name) {
-       return res.status(400).json({error : "you did not provide description , name and completed"})
-    } 
 
-    projectModel.insert({description , name , completed})
-    .then((id ) => {
-        res.status(200).json(id);
-    })
-    .catch(err => {
-        res.status(400).json(err);
-    })
-})
- 
-// remove a project 
 
-server.delete('/api/projects/:id' , (req, res) => {
-  const {id} = req.params;
-  projectModel.remove(id) 
-  .then(response => {
-      if(response){
-        res.status(204).json(response); 
-      } else {
-        res.status(404).json({ error: 'Project with id does not exist' });
-      }
-  })
-  .catch(err => {
-    res.status(500).json({ error: 'Error removing project' });
-  })
-})
+
+
+// MiddleWares 
+
+function validateProjectId(req, res, next) {
+    const id = req.params.id;
+  
+    projectModel.get(id)
+      .then(resource => {
+        if (resource) { 
+            req.resource = resource;
+          next();
+        } else {
+          res.status(400).json({ message: "Project with this id does not exist" });
+        }
+      })
+      .catch(err => {
+        res.status(500).json({ error: "Error" });
+      });
+  }    
+
+
+
+
+
+
