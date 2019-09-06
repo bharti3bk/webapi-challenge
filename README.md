@@ -28,15 +28,20 @@ Demonstrate your understanding of this Sprint's concepts by answering the follow
    
    middleware and routing
 
-- [ ] Describe Middleware? 
+- [ ] Describe Middleware?  
+
+ Middlewares are functions executed in the middle after the incoming request then produces an output which could be the final output passed or could be used by the next middleware until the cycle is completed
 
     
-- [ ] Describe a Resource?
+- [ ] Describe a Resource? 
+  its basically a route or Part of a URL that identifies a resource.
 
-- [ ] What can the API return to help clients know if a request was successful?
+- [ ] What can the API return to help clients know if a request was successful? 
+     
+     status codes.
 
-- [ ] How can we partition our application into sub-applications?
-
+- [ ] How can we partition our application into sub-applications? 
+  
 ## Project Setup
 
 Follow these steps to set up and work on your project:
