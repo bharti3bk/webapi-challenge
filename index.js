@@ -92,4 +92,38 @@ server.get('/api/projects/:id' , (req , res) => {
     })
 })    
   
+// post a new action 
 
+server.post('/api/actions/:id' , (req , res) => {
+    const {description , completed , notes} = req.body;
+    const {id} = req.params; 
+
+    if(!description || !notes || typeof completed !== "boolean"){
+        return res.status(400).json({error : 'you did not provide description , notes and completed' })
+    } 
+     
+    projectModel.getProjectActions({id})
+    .then(( {id} ) => {
+        actionModel.insert({ description, notes, completed });
+      });
+    }) 
+
+// post a new project 
+
+server.post('/api/projects' , (req,res) => {
+    const { name , description , completed } = req.body; 
+    const id = req.params
+    if(!description || !completed || !name) {
+       return res.status(400).json({error : "you did not provide description , name and completed"})
+    } 
+
+    projectModel.insert({description , name , completed})
+    .then((id ) => {
+        res.status(200).json(id);
+    })
+    .catch(err => {
+        res.status(400).json(err);
+    })
+})
+ 
+//
