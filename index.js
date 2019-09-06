@@ -14,7 +14,12 @@ Go code!
 */ 
 
 const express = require('express'); 
-const server = express();
+const server = express(); 
+
+//imports from project and actions 
+
+const projectModel = require('./data/helpers/projectModel');
+const actionsModel = require('./data/helpers/actionModel');
 
 server.use(express.json());
 
@@ -24,6 +29,67 @@ server.get('/', (req, res) => {
 
 const port = 4000;
 server.listen(port, () => { 
-     console.log(`server on ${port}`
-     );
-})
+     console.log(`server on ${port}`);
+})  
+
+// get all the actions 
+
+server.get('/api/actions' , (req , res) => {
+    actionsModel.get()  
+    .then(response => {
+        res.status(200).json(response)
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})  
+
+// get all the projects 
+
+server.get('/api/projects' , (req , res) => {
+    projectModel.get()  
+    .then(response => {
+        res.status(200).json(response)
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+
+// get specific action  
+
+server.get('/api/actions/:id' , (req , res) => {
+    const id = req.params
+    actionsModel.get(id)  
+    .then(response => {
+        if(response) {
+            res.status(200).json(response) 
+        } 
+        else {
+            res.status(400).json(response)
+        } 
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+
+//get specific project 
+
+server.get('/api/projects/:id' , (req , res) => {
+    const id = req.params
+    projectModel.get(id)  
+    .then(response => {
+        if(response) {
+            res.status(200).json(response) 
+        } 
+        else {
+            res.status(400).json(response)
+        } 
+    })
+    .catch(err => {
+        res.status(500).json(err)
+    })
+})    
+  
+
