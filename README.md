@@ -40,7 +40,10 @@ Demonstrate your understanding of this Sprint's concepts by answering the follow
      
      status codes.
 
-- [ ] How can we partition our application into sub-applications? 
+- [ ] How can we partition our application into sub-applications?   
+
+    with the help of routers we can partition our app into sub app
+ 
   
 ## Project Setup
 
